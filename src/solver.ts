@@ -118,8 +118,9 @@ module kiwi
          * Remove a constraint from the solver.
          *
          * @param {Constraint} constraint Constraint to remove from the solver
+         * @param {Boolean} [optimize=true] Optimize to ensure the solver remains consistent
          */
-        removeConstraint( constraint: Constraint ): void
+        removeConstraint( constraint: Constraint, optimize: boolean = true ): void
         {
             var cnPair = this._cnMap.erase( constraint );
             if( cnPair === undefined )
@@ -148,9 +149,25 @@ module kiwi
                 this._substitute( marker, rowPair.second );
             }
 
-            // Optimizing after each constraint is removed ensures that the
-            // solver remains consistent. It makes the solver api easier to
-            // use at a small tradeoff for speed.
+            if ( optimize )
+            {
+                // Optimizing after each constraint is removed ensures that the
+                // solver remains consistent. It makes the solver api easier to
+                // use at a small tradeoff for speed.
+                this._optimize( this._objective );
+            }
+        }
+
+        /**
+         * Remove an array of constraints from the solver.
+         * 
+         * @param {Constraint[]} constraints Constraints to remove from the solver
+         */
+        removeConstraints( constraints: Array<Constraint> ): void
+        {
+            constraints.forEach( (constraint) => {
+                this.removeConstraint( constraint, false );
+            } )
             this._optimize( this._objective );
         }
 
